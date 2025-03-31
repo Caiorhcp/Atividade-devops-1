@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  # MySQL Database for Joomla
+  db:
+    image: mysql:8
+    container_name: mysql-joomla
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: joomla_db
+      MYSQL_USER: joomla_user
+      MYSQL_PASSWORD: joomla_pass
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - joomla_net
+
+  # Joomla Application
+  joomla:
+    image: joomla:latest
+    container_name: joomla-app
+    restart: always
+    ports:
+      - "8080:80"
+    environment:
+      JOOMLA_DB_HOST: db:3306
+      JOOMLA_DB_NAME: joomla_db
+      JOOMLA_DB_USER: joomla_user
+      JOOMLA_DB_PASSWORD: joomla_pass
+    volumes:
+      - joomla_data:/var/www/html
+    networks:
+      - joomla_net
+
+  # phpMyAdmin
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin
+    restart: always
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      MYSQL_ROOT_PASSWORD: root
+    networks:
+      - joomla_net
+
+volumes:
+  db_data:
+  joomla_data:
+
+networks:
+  joomla_net:
